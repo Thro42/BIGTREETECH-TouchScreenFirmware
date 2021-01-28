@@ -225,3 +225,47 @@ bool request_M0(void)
   mustStoreCmd("M0 \n");
   return true;
 }
+
+/**
+ * Select the macro files to execute
+ *
+**/
+char *request_M20_macros(void)
+{
+  resetRequestCommandInfo("Begin file list", // The magic to identify the start
+                          "End file list",   // The magic to identify the stop
+                          "Error",           // The first magic to identify the error response
+                          NULL,              // The second error magic
+                          NULL);             // The third error magic
+
+  mustStoreCmd("M20 P\"macros\"\n");
+
+  // Wait for response
+  while (!requestCommandInfo.done)
+  {
+    loopProcess();
+  }
+  //clearRequestCommandInfo(); //shall be call after copying the buffer ...
+  return requestCommandInfo.cmd_rev_buf;
+}
+
+/**
+ * Execute the Macro-File
+**/
+bool request_M98(char *filename)
+{
+  resetRequestCommandInfo("T:",           // The magic to identify the start
+                          "ok",           // The magic to identify the stop
+                          "Bad command:", // The first magic to identify the error response
+                          "not found",    // The second error magic
+                          NULL);          // The third error magic
+
+  mustStoreCmd("M98 \"/macros/%s\"\n", filename);
+
+  // Wait for response
+  while (!requestCommandInfo.done)
+  {
+    loopProcess();
+  }
+  return true;
+}
